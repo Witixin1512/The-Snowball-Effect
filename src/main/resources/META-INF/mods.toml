@@ -1,0 +1,28 @@
+modLoader="javafml" #mandatory
+loaderVersion="[38,)"
+license="All rights reserved"
+[[mods]]
+modId="igloof"
+version="${file.jarVersion}"
+displayName="Igloof"
+credits="Guy, for his amazing model and idea"
+authors="Witixin"
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+The Igloof is an entity that feeds on snow and grows, be careful though, or it will feed on you...
+'''
+# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+[[dependencies.igloof]]
+    modId="forge"
+    mandatory=true
+    versionRange="[38,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.igloof]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.18,1.19)"
+    ordering="NONE"
+    side="BOTH"
+#geckolib
+

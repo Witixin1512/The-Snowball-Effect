@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "item": "igloof:magic_coal",
+    "count": 1
+  },
+  "pattern": [
+    "ASA",
+    "SIS",
+    "ASA"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "I": {
+      "tag": "minecraft:coals"
+    },
+    "A": {
+      "item": "minecraft:redstone"
+    }
+  }
+}
