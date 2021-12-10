@@ -1,6 +1,6 @@
 {
     "parent": "minecraft:item/generated",
     "textures": {
-        "layer0": "igloof:magic_coal"
+        "layer0": "snowballeffect:magic_coal"
     }
 }

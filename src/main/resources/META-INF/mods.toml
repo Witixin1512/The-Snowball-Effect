@@ -2,27 +2,27 @@ modLoader="javafml" #mandatory
 loaderVersion="[38,)"
 license="All rights reserved"
 [[mods]]
-modId="igloof"
+modId="snowballeffect"
 version="${file.jarVersion}"
-displayName="Igloof"
+displayName="Snowball Effect"
 credits="Guy, for his amazing model and idea"
 authors="Witixin"
 # The description text for the mod (multi line!) (#mandatory)
 description='''
+The Snowball effect is a simple mod written for MMD's winterjam 2021. It adds an entity, an item and a block.
 The Igloof is an entity that feeds on snow and grows, be careful though, or it will feed on you...
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.igloof]]
+[[dependencies.snowballeffect]]
     modId="forge"
     mandatory=true
-    versionRange="[38,)"
+    versionRange="[39,)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.igloof]]
+[[dependencies.snowballeffect]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.18,1.19)"
     ordering="NONE"
     side="BOTH"
-#geckolib
 

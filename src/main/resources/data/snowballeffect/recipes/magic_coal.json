@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "result": {
-    "item": "igloof:magic_coal",
+    "item": "snowballeffect:magic_coal",
     "count": 1
   },
   "pattern": [

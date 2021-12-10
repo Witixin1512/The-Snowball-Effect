@@ -15,7 +15,6 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -49,6 +48,8 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     private static final EntityDataAccessor<Integer> SYNCHED_DATA_AGE = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> ICEY_DATA = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> EATING_DATA = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ATTACKING_DATA = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.BOOLEAN);
+
 
     private AnimationFactory factory = new AnimationFactory(this);
 
@@ -104,7 +105,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         this.goalSelector.addGoal(1, new GloofFollowOwnerGoal(this, 1D, 20.0F, 1F, false));
         this.goalSelector.addGoal(2, new GloofSitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new LeapAtTargetGoal(this, 0.4F));
-        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0D, true));
+        this.goalSelector.addGoal(4, new GloofMeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(7, new GloofRandomStrollGoal(this, 0.0D));
@@ -124,7 +125,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     @Override
     public InteractionResult mobInteract(Player p_30412_, InteractionHand p_30413_) {
         if (p_30412_.level.isClientSide && p_30413_ == InteractionHand.OFF_HAND)return InteractionResult.PASS;
-            if (this.getHealth() < this.getMaxHealth() && p_30412_.getItemInHand(p_30413_).getItem() == Reference.MAGIC_COAL.get()){
+            if (this.getHealth() < this.getMaxHealth() && !this.isIcey() && p_30412_.getItemInHand(p_30413_).getItem() == Reference.MAGIC_COAL.get()){
                 this.heal(4.0f);
                 p_30412_.getItemInHand(p_30413_).shrink(1);
                 return InteractionResult.SUCCESS;
@@ -168,13 +169,16 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         this.entityData.define(SYNCHED_DATA_AGE, 0);
         this.entityData.define(ICEY_DATA, false);
         this.entityData.define(EATING_DATA, false);
+        this.entityData.define(ATTACKING_DATA, false);
     }
+
     @Override
     public void addAdditionalSaveData(CompoundTag p_28156_) {
         super.addAdditionalSaveData(p_28156_);
         p_28156_.putInt("GloofAge", this.getGloofAge());
         p_28156_.putBoolean("GloofIcey", this.isIcey());
         p_28156_.putBoolean("GloofEating", this.isEating());
+        p_28156_.putBoolean("GloofAttacking", this.isAttackingData());
     }
 
     @Override
@@ -183,6 +187,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         this.saveAge(p_28142_.getInt("GloofAge"));
         this.setIcey(p_28142_.getBoolean("GloofIcey"));
         this.setEating(p_28142_.getBoolean("GloofEating"));
+        this.setEating(p_28142_.getBoolean("GloofAttacking"));
     }
 
 
@@ -216,12 +221,17 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.sit", true));
                 return PlayState.CONTINUE;
             }
-            if (event.isMoving() && !gloof.isOrderedToSit()){
+            if (event.isMoving() && !gloof.isOrderedToSit() && !this.isAttackingData()){
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.walk", true));
                 return PlayState.CONTINUE;
             }
             if (gloof.isEating()){
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.chomp", true));
+                return PlayState.CONTINUE;
+            }
+            if (gloof.isAttackingData()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.attack", false));
+                return PlayState.CONTINUE;
             }
             else {
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.idle", true));
@@ -235,17 +245,12 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         return Math.abs(vec.x) > 0 || Math.abs(vec.y) > 0 || Math.abs(vec.z) > 0;
     }
     public <E extends IAnimatable> PlayState attack(AnimationEvent<E> event) {
-        if ( this.isAngry() && !(this.dead || this.getHealth() < 0.01 || this.isDeadOrDying()) && this.getTarget() != null && this.jumping) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.attack", true));
-            return PlayState.CONTINUE;
-        }
         return PlayState.CONTINUE;
     }
 
     @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController<EntityIgloof>(this, "controller", 5, this::predicate));
-        data.addAnimationController(new AnimationController<EntityIgloof>(this, "controller1", 0, this::attack));
     }
 
     @Override
@@ -266,6 +271,14 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     }
     public void setEating(boolean bool){
         this.entityData.set(EATING_DATA, bool);
+    }
+
+    public boolean isAttackingData(){
+        return this.entityData.get(ATTACKING_DATA);
+    }
+
+    public void setAttackingData(boolean bool) {
+        this.entityData.set(ATTACKING_DATA, bool);
     }
 
     @Override
@@ -294,6 +307,10 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
 
     }
 
+    public static boolean matchesSnow(Block block) {
+        return block.equals(Blocks.POWDER_SNOW) || block.equals(Blocks.SNOW_BLOCK);
+    }
+
     private static class GloofSitWhenOrderedToGoal extends SitWhenOrderedToGoal{
 
         private EntityIgloof entity;
@@ -308,6 +325,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
             return entity.getGloofAge() <= 30 && super.canUse();
         }
     }
+
     private static class EatSnowGoal extends Goal {
 
         private EntityIgloof gloof;
@@ -345,6 +363,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
             if (gloof.isIcey()) return false;
             if (counter == 20){
                 this.cachePos();
+                if (idealPos == null) return false;
                 this.gloof.navigation.createPath(idealPos, 1);
             }
             if (counter == 0){
@@ -354,9 +373,6 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
             }
             --counter;
             return false;
-        }
-        private boolean matchesSnow(Block block) {
-            return block.equals(Blocks.POWDER_SNOW) || block.equals(Blocks.SNOW_BLOCK);
         }
 
         private void cachePos(){
@@ -481,5 +497,24 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
             }
         }
     }
+    private static class GloofMeleeAttackGoal extends MeleeAttackGoal {
+
+        public GloofMeleeAttackGoal(PathfinderMob p_25552_, double p_25553_, boolean p_25554_) {
+            super(p_25552_, p_25553_, p_25554_);
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            ((EntityIgloof) this.mob).setAttackingData(false);
+        }
+
+        @Override
+        protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
+            super.checkAndPerformAttack(p_25557_, p_25558_);
+            ((EntityIgloof) this.mob).setAttackingData(true);
+        }
+    }
 }
+
 

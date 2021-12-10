@@ -29,10 +29,10 @@ public class MagicCoalItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
-        if (ctx.getLevel().getBlockState(ctx.getClickedPos()).getBlock().equals(Blocks.SNOW_BLOCK)){
+        if (EntityIgloof.matchesSnow(ctx.getLevel().getBlockState(ctx.getClickedPos()).getBlock())){
             EntityIgloof entityIgloof = EntityIgloof.of(ctx.getLevel(), ctx.getPlayer());
             entityIgloof.setPos(ctx.getClickLocation());
-            ctx.getLevel().setBlock(ctx.getClickedPos(), Blocks.AIR.defaultBlockState(), 3);
+            ctx.getLevel().destroyBlock(ctx.getClickedPos(), true);
             ctx.getLevel().addFreshEntity(entityIgloof);
             ctx.getItemInHand().setCount(0);
         }

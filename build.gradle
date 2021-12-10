@@ -12,8 +12,8 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = '1.0'
-group = 'net.witixin.igloof' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'igloof'
+group = 'net.witixin.snowballeffect' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'snowballeffect'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -27,7 +27,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                igloof {
+                snowballeffect {
                     source sourceSets.main
                 }
             }
@@ -39,7 +39,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                igloof {
+                snowballeffect {
                     source sourceSets.main
                 }
             }
@@ -51,7 +51,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'igloof', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'snowballeffect', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
                 igloof {
@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18-38.0.17'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.0'
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-1.18:3.0.1')
 }
@@ -80,7 +80,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "igloof",
+                "Specification-Title"     : "Snowball Effect",
                 "Specification-Vendor"    : "Witixin",
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
