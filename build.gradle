@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.0'
+version = '1.1'
 group = 'net.witixin.snowballeffect' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'snowballeffect'
 
@@ -54,7 +54,7 @@ minecraft {
             args '--mod', 'snowballeffect', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                igloof {
+                snowballeffect {
                     source sourceSets.main
                 }
             }
@@ -71,9 +71,9 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.0'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.5'
     //geckolib
-    implementation fg.deobf('software.bernie.geckolib:geckolib-1.18:3.0.1')
+    implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.3')
 }
 
 

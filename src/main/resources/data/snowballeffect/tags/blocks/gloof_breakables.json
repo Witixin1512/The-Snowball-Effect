@@ -1,0 +1,6 @@
+{
+    "values": [
+        "#forge:dirt", "#minecraft:logs", "#minecraft:planks", "#forge:glass", "#minecraft:crops", "#minecraft:bee_growables", "#minecraft:flowers", "#minecraft:wooden_slabs", "#minecraft:wooden_doors", "#minecraft:wooden_trapdoors", "#minecraft:saplings",
+        "#forge:gravel", "#minecraft:wither_summon_base_blocks", "#minecraft:ice"
+    ]
+}

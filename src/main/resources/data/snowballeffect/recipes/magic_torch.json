@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "result": {
+      "item": "snowballeffect:magic_torch",
+      "count": 1
+    },
+    "pattern": [
+      "A",
+      "I"
+    ],
+    "key": {
+
+      "I": {
+        "tag": "forge:rods/wooden"
+      },
+      "A": {
+        "item": "snowballeffect:magic_coal"
+      }
+    }
+  }

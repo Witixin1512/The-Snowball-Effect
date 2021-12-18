@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "snowballeffect:block/magic_torch_standing"
+    },
+    "facing=north": {
+      "model": "snowballeffect:block/magic_torch_standing",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "snowballeffect:block/magic_torch_standing",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "snowballeffect:block/magic_torch_standing",
+      "y": 180
+    }
+  }
+}
