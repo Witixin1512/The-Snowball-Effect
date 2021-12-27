@@ -25,4 +25,9 @@ The Igloof is an entity that feeds on snow and grows, be careful though, or it w
     versionRange="[1.18,1.19)"
     ordering="NONE"
     side="BOTH"
-
+[[dependencies.snowballeffect]]
+    modId="geckolib3"
+    mandatory=true
+    versionRange="[3.0.3,)"
+    ordering="NONE"
+    side="BOTH"
