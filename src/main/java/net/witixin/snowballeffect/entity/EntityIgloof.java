@@ -29,6 +29,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.Tags;
 import net.witixin.snowballeffect.Reference;
+import net.witixin.snowballeffect.SEConfig;
 import net.witixin.snowballeffect.registry.EntityRegistry;
 import net.witixin.snowballeffect.registry.ItemRegistry;
 import org.jetbrains.annotations.Nullable;
@@ -50,12 +51,13 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
 
     public static final Tags.IOptionalNamedTag<Block> GLOOF_BREAKABLES_TAG = BlockTags.createOptional(Reference.rl("blocks/gloof_breakables"));
 
-    private static final int UNSITTABLE_AGE = 30;
-    private static final float GROWTH_CONSTANT = 1.08f;
-    private static final int MAX_AGE = 40;
-    private static final int MAX_FOLLOW_DIST = 30;
-    private static final int MELTING_COOLDOWN_TICKS = 1200 * 5;
-    private static final int EATING_COOLDOWN_TICKS = 1200;
+    private static final int UNSITTABLE_AGE = SEConfig.UNSITTABLE_AGE.get();
+    private static final double GROWTH_CONSTANT = SEConfig.GROWTH_CONSTANT.get();
+    private static final int MAX_AGE = SEConfig.MAX_AGE.get();
+    private static final int MAX_FOLLOW_DIST = SEConfig.MAX_FOLLOW_DIST.get();
+    private static final int MELTING_COOLDOWN_TICKS = SEConfig.MELTING_COOLDOWN_TICKS.get();
+    private static final int EATING_COOLDOWN_TICKS = SEConfig.EATING_COOLDOWN_TICKS.get();
+
     public static Map<Block, Float> valueMap = new HashMap<>();
 
     private static final EntityDataAccessor<Integer> SYNCHED_DATA_AGE = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);

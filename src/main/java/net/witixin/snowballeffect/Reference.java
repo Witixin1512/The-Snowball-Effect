@@ -6,7 +6,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -31,7 +33,6 @@ public class Reference
     public static final RegistryObject<SimpleParticleType> MAGIC_TORCH_PARTICLE = PARTICLE_REG.register("magic_coal_particle", () -> new SimpleParticleType(true));
 
     public Reference() {
-        PARTICLE_REG.getEntries().forEach(entry -> System.out.println(entry));
         PARTICLE_REG.register(FMLJavaModLoadingContext.get().getModEventBus());
         EntityRegistry.get().register(FMLJavaModLoadingContext.get().getModEventBus());
         BlockRegistry.get().register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -39,6 +40,7 @@ public class Reference
         GeckoLib.initialize();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setupClient);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SEConfig.GENERAL_SPEC, "snowballeffect.toml");
     }
 
 
