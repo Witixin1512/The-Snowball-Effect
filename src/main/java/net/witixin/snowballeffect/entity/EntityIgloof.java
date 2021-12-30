@@ -1,38 +1,38 @@
 package net.witixin.snowballeffect.entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.command.impl.data.EntityDataAccessor;
+import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.SnowballEntity;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
+import net.minecraft.util.IndirectEntityDamageSource;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.Tags;
 import net.witixin.snowballeffect.Reference;
 import net.witixin.snowballeffect.SEConfig;
 import net.witixin.snowballeffect.registry.EntityRegistry;
 import net.witixin.snowballeffect.registry.ItemRegistry;
-import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -41,11 +41,14 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatable {
+import static net.witixin.snowballeffect.entity.EntityIgloof.GloofRandomStrollGoal.reducedTickDelay;
+
+public class EntityIgloof extends TameableEntity implements IAngerable, IAnimatable {
 
 
 
@@ -60,21 +63,21 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
 
     public static Map<Block, Float> valueMap = new HashMap<>();
 
-    private static final EntityDataAccessor<Integer> SYNCHED_DATA_AGE = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Boolean> ICEY_DATA = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> EATING_DATA = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> ATTACKING_DATA = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> RENDER_SITTING = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Integer> EATING_COOLDOWN = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> MELTING_COOLDOWN = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> TICKS_TILL_EATING = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Float> SNOW_COUNTER = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<Float> SNOW_FEED_COUNTER = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<Integer> ICE_TICKS = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);
+    private static final DataParameter<Integer> SYNCHED_DATA_AGE = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.INT);
+    private static final DataParameter<Boolean> ICEY_DATA = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> EATING_DATA = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> ATTACKING_DATA = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> RENDER_SITTING = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> EATING_COOLDOWN = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.INT);
+    private static final DataParameter<Integer> MELTING_COOLDOWN = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.INT);
+    private static final DataParameter<Integer> TICKS_TILL_EATING = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.INT);
+    private static final DataParameter<Float> SNOW_COUNTER = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.FLOAT);
+    private static final DataParameter<Float> SNOW_FEED_COUNTER = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> ICE_TICKS = EntityDataManager.defineId(EntityIgloof.class, DataSerializers.INT);
 
     private AnimationFactory factory = new AnimationFactory(this);
 
-    public EntityIgloof(EntityType<? extends EntityIgloof> entityType, Level level) {
+    public EntityIgloof(EntityType<? extends EntityIgloof> entityType, World level) {
         super(EntityRegistry.IGLOOF.get(), level);
 
     }
@@ -82,10 +85,9 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     public static void setupValueMap(){
         valueMap.put(Blocks.SNOW, 0.5f);
         valueMap.put(Blocks.SNOW_BLOCK, 4.0f);
-        valueMap.put(Blocks.POWDER_SNOW, 8.0f);
     }
 
-    public static EntityIgloof of(Level level, Player id){
+    public static EntityIgloof of(World level, PlayerEntity id){
         EntityIgloof toReturn = new EntityIgloof(EntityRegistry.IGLOOF.get(), level);
         toReturn.tame(id);
         return toReturn;
@@ -163,7 +165,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
 
 
     @Override
-    public EntityDimensions getDimensions(Pose p_33597_) {
+    public EntitySize getDimensions(Pose p_33597_) {
         return super.getDimensions(p_33597_).scale(this.getSize());
     }
 
@@ -196,7 +198,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         this.goalSelector.addGoal(3, new LeapAtTargetGoal(this, 0.4F));
         this.goalSelector.addGoal(4, new GloofMeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
-        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(3, new LookRandomlyGoal(this));
         this.goalSelector.addGoal(7, new GloofRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(8, new GloofFloatGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
@@ -209,36 +211,36 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     }
     @Override
     public boolean isInvulnerableTo(DamageSource source){
-        return super.isInvulnerableTo(source) || source == DamageSource.FREEZE || isEntityDamageSourceSnowball(source);
+        return super.isInvulnerableTo(source)  || isEntityDamageSourceSnowball(source);
     }
     private boolean isEntityDamageSourceSnowball(DamageSource source){
-        return source instanceof IndirectEntityDamageSource && source.getDirectEntity() instanceof Snowball;
+        return source instanceof IndirectEntityDamageSource && source.getDirectEntity() instanceof SnowballEntity;
     }
 
     @Override
-    public InteractionResult mobInteract(Player p_30412_, InteractionHand p_30413_) {
-        if (p_30412_.level.isClientSide && p_30413_ == InteractionHand.OFF_HAND)return InteractionResult.PASS;
+    public ActionResultType mobInteract(PlayerEntity p_30412_, Hand p_30413_) {
+        if (p_30412_.level.isClientSide && p_30413_ == Hand.OFF_HAND)return ActionResultType.PASS;
             if (this.getHealth() < this.getMaxHealth() && !this.isIcey() && p_30412_.getItemInHand(p_30413_).getItem() == ItemRegistry.MAGIC_COAL.get()){
                 this.heal(4.0f);
                 p_30412_.getItemInHand(p_30413_).shrink(1);
-                return InteractionResult.SUCCESS;
+                return ActionResultType.SUCCESS.SUCCESS;
 
             }
             if (this.isIcey() && p_30412_.getItemInHand(p_30413_).getItem() == ItemRegistry.MAGIC_TORCH_ITEM.get()){
                 this.setIcey(false);
                 p_30412_.getItemInHand(p_30413_).shrink(1);
-                return InteractionResult.SUCCESS;
+                return ActionResultType.SUCCESS;
             }
             if (!this.isIcey() && this.getEatingCooldownTicks() < 1000 && this.getGloofAge() < 2 && p_30412_.getItemInHand(p_30413_).getItem() == Items.SNOWBALL && p_30412_.getItemInHand(p_30413_).getCount() >= 8){
                 this.feed();
                 p_30412_.getItemInHand(p_30413_).shrink(8);
-                return InteractionResult.SUCCESS;
+                return ActionResultType.SUCCESS;
             }
             if (!this.isIcey() && p_30412_.getItemInHand(p_30413_).getItem() == ItemRegistry.MAGIC_TORCH_ITEM.get() && this.getMeltingCooldownTicks() == 0 && this.getGloofAge() > 0){
                 this.unfeed();
                 p_30412_.getItemInHand(p_30413_).shrink(1);
                 this.setMeltingCooldownTicks(MELTING_COOLDOWN_TICKS);
-                return InteractionResult.SUCCESS;
+                return ActionResultType.SUCCESS;
             }
             if (this.isTame() && getGloofAge() <= UNSITTABLE_AGE){
                 if (this.isOwnedBy(p_30412_) || super.mobInteract(p_30412_, p_30413_).consumesAction()){
@@ -246,7 +248,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                         this.setOrderedToSit(false);
                         this.setRenderSitting(false);
                         this.setInSittingPose(false);
-                        return InteractionResult.SUCCESS;
+                        return ActionResultType.SUCCESS;
                     }
                     if (!isOrderedToSit()){
                         this.setOrderedToSit(true);
@@ -254,7 +256,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                         this.setInSittingPose(true);
                         this.navigation.stop();
                         this.setTarget(null);
-                        return InteractionResult.SUCCESS;
+                        return ActionResultType.SUCCESS;
                     }
 
                 }
@@ -262,11 +264,6 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         return super.mobInteract(p_30412_, p_30413_);
     }
 
-    @Nullable
-    @Override
-    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob) {
-        return null;
-    }
 
     public int getMaxFollowDist(){
         return MAX_FOLLOW_DIST + getGloofAge() * getGloofAge() ;
@@ -279,8 +276,8 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
          }
     }
     private void destroyBlockInsideOn(BlockState state){
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-        AABB aabb = this.getBoundingBox();
+        BlockPos.Mutable blockpos$mutableblockpos = new BlockPos.Mutable();
+        AxisAlignedBB aabb = this.getBoundingBox();
         BlockPos blockpos = new BlockPos(aabb.minX + 0.001D, aabb.minY + 0.001D, aabb.minZ + 0.001D);
         BlockPos blockpos1 = new BlockPos(aabb.maxX - 0.001D, aabb.maxY - 0.001D, aabb.maxZ - 0.001D);
         for(int i = blockpos.getX(); i <= blockpos1.getX(); ++i) {
@@ -299,6 +296,12 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     }
 
 
+    @Nullable
+    @Override
+    public AgeableEntity getBreedOffspring(ServerWorld p_241840_1_, AgeableEntity p_241840_2_) {
+        return null;
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -316,7 +319,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(CompoundNBT tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("GloofAge", this.getGloofAge());
         tag.putBoolean("GloofIcey", this.isIcey());
@@ -331,7 +334,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
+    public void readAdditionalSaveData(CompoundNBT tag) {
         super.readAdditionalSaveData(tag);
         this.saveAge(tag.getInt("GloofAge"));
         this.setIcey(tag.getBoolean("GloofIcey"));
@@ -378,16 +381,16 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     public void aiStep() {
         super.aiStep();
         if (!this.level.isClientSide) {
-            this.updatePersistentAnger((ServerLevel)this.level, true);
+            this.updatePersistentAnger((ServerWorld) this.level, true);
         }
 
     }
     @Override
-    public boolean canBeLeashed(Player p_30396_) {
+    public boolean canBeLeashed(PlayerEntity p_30396_) {
         return !this.isAngry() && super.canBeLeashed(p_30396_) && getGloofAge() <= UNSITTABLE_AGE;
     }
     @Override
-    public boolean canMate(Animal animal){
+    public boolean canMate(AnimalEntity animal){
         return false;
     }
 
@@ -506,7 +509,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         return valueMap.containsKey(block);
     }
 
-    private static class GloofSitWhenOrderedToGoal extends SitWhenOrderedToGoal{
+    private static class GloofSitWhenOrderedToGoal extends SitGoal{
 
         private EntityIgloof entity;
 
@@ -521,7 +524,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         }
     }
 
-    private static class GloofFloatGoal extends FloatGoal {
+    private static class GloofFloatGoal extends SwimGoal {
 
         private EntityIgloof gloof;
 
@@ -541,8 +544,8 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         }
 
     }
-    private static class GloofRandomStrollGoal extends RandomStrollGoal {
-        public GloofRandomStrollGoal(PathfinderMob p_25734_, double p_25735_) {
+    protected static class GloofRandomStrollGoal extends RandomWalkingGoal {
+        public GloofRandomStrollGoal(CreatureEntity p_25734_, double p_25735_) {
             super(p_25734_, p_25735_);
         }
 
@@ -561,7 +564,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                     }
                 }
 
-                Vec3 vec3 = this.getPosition();
+                Vector3d vec3 = this.getPosition();
                 if (vec3 == null) {
                     return false;
                 } else {
@@ -572,13 +575,17 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                     return true;
                 }
             }
+
+        }
+        protected static int reducedTickDelay(int p_186074_) {
+            return -Math.floorDiv(-p_186074_, 2);
         }
     }
     private static class GloofFollowOwnerGoal extends FollowOwnerGoal {
 
         private double speedMod;
 
-        public GloofFollowOwnerGoal(TamableAnimal p_25294_, double p_25295_, float p_25296_, float p_25297_, boolean p_25298_) {
+        public GloofFollowOwnerGoal(TameableEntity p_25294_, double p_25295_, float p_25296_, float p_25297_, boolean p_25298_) {
             super(p_25294_, p_25295_, p_25296_, p_25297_, p_25298_);
             this.speedMod = p_25295_;
         }
@@ -598,9 +605,6 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                 }
             }
         }
-        protected int adjustedTickDelay(int p_186072_) {
-            return this.requiresUpdateEveryTick() ? p_186072_ : reducedTickDelay(p_186072_);
-        }
         @Override
         public boolean canUse(){
             LivingEntity livingentity = this.tamable.getOwner();
@@ -617,6 +621,9 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                 return true;
             }
         }
+        protected int adjustedTickDelay(int p_186072_) {
+            return this.isInterruptable() ? p_186072_ : reducedTickDelay(p_186072_);
+        }
         @Override
         public boolean canContinueToUse() {
             if (this.tamable.getNavigation().isDone()) {
@@ -630,7 +637,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     }
     private static class GloofMeleeAttackGoal extends MeleeAttackGoal {
 
-        public GloofMeleeAttackGoal(PathfinderMob p_25552_, double p_25553_, boolean p_25554_) {
+        public GloofMeleeAttackGoal(CreatureEntity p_25552_, double p_25553_, boolean p_25554_) {
             super(p_25552_, p_25553_, p_25554_);
         }
 
@@ -650,8 +657,8 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
             super.checkAndPerformAttack(p_25557_, p_25558_);
             ((EntityIgloof) this.mob).setAttackingData(true);
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-            AABB aabb = this.mob.getBoundingBox();
+            BlockPos.Mutable blockpos$mutableblockpos = new BlockPos.Mutable();
+            AxisAlignedBB aabb = this.mob.getBoundingBox();
             BlockPos blockpos = new BlockPos(aabb.minX + 0.001D, aabb.minY + 0.001D, aabb.minZ + 0.001D);
             BlockPos blockpos1 = new BlockPos(aabb.maxX - 0.001D, aabb.maxY - 0.001D, aabb.maxZ - 0.001D);
             for(int i = blockpos.getX(); i <= blockpos1.getX() + (getAtackRange() *getXModifier()); ++i) {
@@ -670,7 +677,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         private int getAtackRange(){
             return ((EntityIgloof) this.mob).getGloofAge() / 5;
         }
-        private Vec3i getModifier(){
+        private Vector3i getModifier(){
             return this.mob.getDirection().getNormal();
         }
         private int getXModifier(){

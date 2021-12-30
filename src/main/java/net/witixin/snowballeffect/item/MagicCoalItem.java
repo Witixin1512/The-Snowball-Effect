@@ -1,20 +1,19 @@
 package net.witixin.snowballeffect.item;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.world.World;
 import net.witixin.snowballeffect.entity.EntityIgloof;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class MagicCoalItem extends Item {
     }
 
     @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
+    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (entity instanceof EntityIgloof){
             if (((EntityIgloof)entity).isIcey()){
                 ((EntityIgloof)entity).setIcey(false);
@@ -34,16 +33,16 @@ public class MagicCoalItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack p_41421_, @Nullable Level p_41422_, List<Component> p_41423_, TooltipFlag p_41424_) {
+    public void appendHoverText(ItemStack p_41421_, World p_41422_, List<ITextComponent> p_41423_, ITooltipFlag p_41424_) {
         super.appendHoverText(p_41421_, p_41422_, p_41423_, p_41424_);
-        p_41423_.add(new TextComponent("Seems to react oddly around snowy blocks...").setStyle(Style.EMPTY.withColor(TextColor.parseColor("yellow"))));
+        p_41423_.add(new StringTextComponent("Seems to react oddly around snowy blocks...").setStyle(Style.EMPTY.withColor(Color.parseColor("yellow"))));
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext ctx) {
+    public ActionResultType useOn(ItemUseContext ctx) {
         if (EntityIgloof.matchesSnow(ctx.getLevel().getBlockState(ctx.getClickedPos()).getBlock())){
             EntityIgloof entityIgloof = EntityIgloof.of(ctx.getLevel(), ctx.getPlayer());
-            entityIgloof.setPos(ctx.getClickLocation());
+            entityIgloof.setPos(ctx.getClickLocation().x, ctx.getClickLocation().y, ctx.getClickLocation().z);
             ctx.getLevel().destroyBlock(ctx.getClickedPos(), true);
             ctx.getLevel().addFreshEntity(entityIgloof);
             ctx.getItemInHand().setCount(0);

@@ -1,6 +1,6 @@
 package net.witixin.snowballeffect.client;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import net.witixin.snowballeffect.Reference;
 import net.witixin.snowballeffect.entity.EntityIgloof;
 import software.bernie.geckolib3.model.AnimatedGeoModel;

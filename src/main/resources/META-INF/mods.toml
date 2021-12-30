@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[38,)"
+loaderVersion="[36,)"
 license="MIT"
 [[mods]]
 modId="snowballeffect"
@@ -16,18 +16,18 @@ The Igloof is an entity that feeds on snow and grows, be careful though, or it w
 [[dependencies.snowballeffect]]
     modId="forge"
     mandatory=true
-    versionRange="[39,)"
+    versionRange="[36,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.snowballeffect]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18,1.19)"
+    versionRange="[1.16,1.17)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.snowballeffect]]
     modId="geckolib3"
     mandatory=true
-    versionRange="[3.0.3,)"
+    versionRange="[3.0.45,)"
     ordering="NONE"
     side="BOTH"

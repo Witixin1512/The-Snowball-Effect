@@ -1,17 +1,16 @@
 package net.witixin.snowballeffect.client;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.particles.BasicParticleType;
 
-public class TorchParticle extends TextureSheetParticle {
+public class TorchParticle extends RisingParticle {
 
 
-    protected TorchParticle(ClientLevel p_108328_, double p_108329_, double p_108330_, double p_108331_, double p_108332_, double p_108333_, double p_108334_) {
-        super(p_108328_, p_108329_, p_108330_, p_108331_, p_108332_, p_108333_, p_108334_);
+    protected TorchParticle(ClientWorld p_108328_, double p_108329_, double p_108330_, double p_108331_, double p_108332_, double p_108333_, double p_108334_, IAnimatedSprite sprite) {
+        super(p_108328_, p_108329_, p_108330_, p_108331_,0.1F, -0.1F, 0.1F, p_108332_, p_108333_, p_108334_, 0.4f, sprite, 0.5F, 20, -0.004D, false);
         this.lifetime = 10;
         this.gravity = 0.5F;
-        this.friction = 0.7F;
         this.gravity = 0.5F;
         this.xd *= 0.1F;
         this.yd *= 0.1F;
@@ -25,22 +24,21 @@ public class TorchParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    public IParticleRenderType getRenderType() {
+        return IParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
 
-    public static class Provider implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet set;
+    public static class Provider implements IParticleFactory<BasicParticleType> {
+        private final IAnimatedSprite set;
 
-        public Provider(SpriteSet set){
+        public Provider(IAnimatedSprite set){
             this.set = set;
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            TorchParticle toReturn = new TorchParticle(level, x, y, z, xSpeed, ySpeed, zSpeed);
-            toReturn.pickSprite(set);
+        public Particle createParticle(BasicParticleType typeIn, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+            TorchParticle toReturn = new TorchParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, set);
             return toReturn;
         }
     }
