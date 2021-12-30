@@ -598,6 +598,9 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                 }
             }
         }
+        protected int adjustedTickDelay(int p_186072_) {
+            return this.requiresUpdateEveryTick() ? p_186072_ : reducedTickDelay(p_186072_);
+        }
         @Override
         public boolean canUse(){
             LivingEntity livingentity = this.tamable.getOwner();

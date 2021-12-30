@@ -1,6 +1,6 @@
 modLoader="javafml" #mandatory
 loaderVersion="[38,)"
-license="All rights reserved"
+license="MIT"
 [[mods]]
 modId="snowballeffect"
 version="${file.jarVersion}"
