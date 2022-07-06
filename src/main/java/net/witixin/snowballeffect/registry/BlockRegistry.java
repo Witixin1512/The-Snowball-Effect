@@ -23,7 +23,7 @@ public class BlockRegistry {
     public static final RegistryObject<Block> WALL_MAGIC_TORCH = BLOCK_REG.register("magic_torch_standing", () ->
             new WallTorchBlock(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel((lightLevel) -> {return 15;}).sound(SoundType.WOOD).dropsLike(MAGIC_TORCH.get()), Reference.MAGIC_TORCH_PARTICLE.orElseGet(() -> ParticleTypes.FLAME)));
 
-    public static DeferredRegister<?> get(){
+    public static DeferredRegister<Block> get(){
         return BLOCK_REG;
     }
 }

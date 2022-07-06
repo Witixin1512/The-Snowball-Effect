@@ -6,7 +6,7 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.witixin.snowballeffect.client.IgloofEntityRenderer;
+import net.witixin.snowballeffect.entity.IgloofEntityRenderer;
 import net.witixin.snowballeffect.client.TorchParticle;
 import net.witixin.snowballeffect.registry.EntityRegistry;
 

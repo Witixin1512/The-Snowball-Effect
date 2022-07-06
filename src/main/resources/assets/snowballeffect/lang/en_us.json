@@ -1,5 +1,6 @@
 {
     "item.snowballeffect.magic_coal" : "Magic Coal",
     "entity.snowballeffect.igloof" : "Igloof",
-    "block.snowballeffect.magic_torch_floor" : "Magic Torch"
+    "block.snowballeffect.magic_torch_floor" : "Magic Torch",
+    "itemGroup.snowballeffect.creativetab" : "Snowball Effect"
 }

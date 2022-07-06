@@ -1,4 +1,4 @@
-package net.witixin.snowballeffect.client;
+package net.witixin.snowballeffect.client.igloof;
 
 import net.minecraft.resources.ResourceLocation;
 import net.witixin.snowballeffect.Reference;

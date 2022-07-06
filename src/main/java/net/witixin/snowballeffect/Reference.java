@@ -1,6 +1,5 @@
 package net.witixin.snowballeffect;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.particles.ParticleType;
@@ -15,7 +14,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import net.witixin.snowballeffect.client.TorchParticle;
 import net.witixin.snowballeffect.entity.EntityIgloof;
 import net.witixin.snowballeffect.registry.BlockRegistry;
 import net.witixin.snowballeffect.registry.EntityRegistry;
@@ -52,7 +50,6 @@ public class Reference
         ItemBlockRenderTypes.setRenderLayer(BlockRegistry.MAGIC_TORCH.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(BlockRegistry.WALL_MAGIC_TORCH.get(), RenderType.cutout());
     }
-
 
     public static ResourceLocation rl(String s ){
         return new ResourceLocation(MODID, s);

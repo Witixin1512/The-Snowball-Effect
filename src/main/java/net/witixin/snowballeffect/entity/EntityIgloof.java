@@ -8,6 +8,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -28,8 +29,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.witixin.snowballeffect.Reference;
 import net.witixin.snowballeffect.SEConfig;
+import net.witixin.snowballeffect.registry.BlockRegistry;
 import net.witixin.snowballeffect.registry.EntityRegistry;
 import net.witixin.snowballeffect.registry.ItemRegistry;
 import org.jetbrains.annotations.Nullable;
@@ -42,14 +46,14 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatable {
 
 
-
-    public static final Tags.IOptionalNamedTag<Block> GLOOF_BREAKABLES_TAG = BlockTags.createOptional(Reference.rl("blocks/gloof_breakables"));
+    public static final TagKey<Block> GLOOF_BREAKABLES_TAG = BlockRegistry.get().createTagKey("gloof_breakables");
 
     private static final int UNSITTABLE_AGE = SEConfig.UNSITTABLE_AGE.get();
     private static final double GROWTH_CONSTANT = SEConfig.GROWTH_CONSTANT.get();
@@ -57,6 +61,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     private static final int MAX_FOLLOW_DIST = SEConfig.MAX_FOLLOW_DIST.get();
     private static final int MELTING_COOLDOWN_TICKS = SEConfig.MELTING_COOLDOWN_TICKS.get();
     private static final int EATING_COOLDOWN_TICKS = SEConfig.EATING_COOLDOWN_TICKS.get();
+    private static final int AGE_THAT_BREAKS_BLOCKS = 25;
 
     public static Map<Block, Float> valueMap = new HashMap<>();
 
@@ -71,12 +76,12 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     private static final EntityDataAccessor<Float> SNOW_COUNTER = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> SNOW_FEED_COUNTER = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> ICE_TICKS = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<String> ACCESSORY = SynchedEntityData.defineId(EntityIgloof.class, EntityDataSerializers.STRING);
 
     private AnimationFactory factory = new AnimationFactory(this);
 
     public EntityIgloof(EntityType<? extends EntityIgloof> entityType, Level level) {
         super(EntityRegistry.IGLOOF.get(), level);
-
     }
 
     public static void setupValueMap(){
@@ -119,6 +124,12 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                 this.setIcey(true);
                 this.setEating(false);
             }
+            if (this.getGloofAge() >= AGE_THAT_BREAKS_BLOCKS){
+                tryCheckInsideBlocks();
+                if (ForgeRegistries.BLOCKS.tags().getTag(GLOOF_BREAKABLES_TAG).contains(this.getBlockStateOn().getBlock())){
+                    this.level.destroyBlock(this.getOnPos(), true);
+                }
+            }
         }
     }
 
@@ -138,7 +149,9 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     public void feed(){
         if (getGloofAge() == MAX_AGE)    return;
         this.saveAge(getGloofAge() + 1);
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((2* getGloofAge()) / getIceReduction());
+        double maxHealthGrowth = (2D* getGloofAge()) / getIceReduction();
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(maxHealthGrowth);
+        this.heal((float) maxHealthGrowth);
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue((getGloofAge() % 3 == 0 ? 1 : 0) / getIceReduction() );
         this.updateDims();
         this.refreshDimensions();
@@ -274,10 +287,12 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
 
     @Override
     public void onInsideBlock(BlockState state) {
-         if (this.getGloofAge() >= 25 && GLOOF_BREAKABLES_TAG.contains(state.getBlock())){
+         if (this.getGloofAge() >= AGE_THAT_BREAKS_BLOCKS && ForgeRegistries.BLOCKS.tags().getTag(GLOOF_BREAKABLES_TAG).contains(state.getBlock()) ){
              destroyBlockInsideOn(state);
          }
     }
+
+
     private void destroyBlockInsideOn(BlockState state){
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
         AABB aabb = this.getBoundingBox();
@@ -290,7 +305,6 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                     BlockState blockstate = this.level.getBlockState(blockpos$mutableblockpos);
                     if (state.equals(blockstate)) {
                         this.level.destroyBlock(blockpos$mutableblockpos, true);
-                        System.out.println("Found a block");
                         break;
                     }
                 }
@@ -313,6 +327,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         this.entityData.define(SNOW_COUNTER, 0.0f);
         this.entityData.define(SNOW_FEED_COUNTER, 0.0f);
         this.entityData.define(ICE_TICKS, 0);
+        this.entityData.define(ACCESSORY, "NONE");
     }
 
     @Override
@@ -328,6 +343,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         tag.putFloat("GloofSnowCounter", this.getSnowCounter());
         tag.putFloat("GloofSnowFeed", this.getSnowFeed());
         tag.putInt("GloofIceTicks", this.getIceTicks());
+        tag.putString("Accessory", this.getAccessory());
     }
 
     @Override
@@ -344,6 +360,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         this.setSnowCounter(tag.getFloat("GloofSnowCounter"));
         this.setSnowFeed(tag.getFloat("GloofSnowFeed"));
         this.setIceTicks(tag.getInt("GloofIceTicks"));
+        this.setAccessory(tag.getString("Accessory"));
     }
 
     public boolean isRenderSitting(){
@@ -373,6 +390,12 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
     }
     public int getIceTicks(){return this.entityData.get(ICE_TICKS);}
     public void setIceTicks(int value){this.entityData.set(ICE_TICKS, value);}
+    public String getAccessory(){
+        return this.entityData.get(ACCESSORY);
+    }
+    public void setAccessory(String accessory){
+        this.entityData.set(ACCESSORY, accessory);
+    }
 
     @Override
     public void aiStep() {
@@ -643,7 +666,6 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
         @Override
         public void tick() {
             super.tick();
-            System.out.println(this.mob.distanceToSqr(this.mob.getTarget()));
         }
 
         @Override
@@ -659,7 +681,7 @@ public class EntityIgloof extends TamableAnimal implements NeutralMob, IAnimatab
                     for (int k = blockpos.getZ(); k <= blockpos1.getZ() + (getAtackRange() * getZModifier()); ++k) {
                         blockpos$mutableblockpos.set(i, j, k);
                         BlockState blockstate = this.mob.level.getBlockState(blockpos$mutableblockpos);
-                        if (GLOOF_BREAKABLES_TAG.contains(blockstate.getBlock())){
+                        if (ForgeRegistries.BLOCKS.tags().getTag(GLOOF_BREAKABLES_TAG).contains(blockstate.getBlock()) ){
                             this.mob.level.destroyBlock(blockpos$mutableblockpos, true);
                         }
                     }
