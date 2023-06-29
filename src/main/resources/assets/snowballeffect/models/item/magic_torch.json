@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/template_torch",
+  "parent": "minecraft:item/generated",
   "textures": {
-    "torch": "snowballeffect:magic_torch"
+    "layer0": "snowballeffect:item/magic_torch"
   }
 }

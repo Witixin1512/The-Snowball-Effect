@@ -6,22 +6,25 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import net.witixin.snowballeffect.Reference;
+import net.witixin.snowballeffect.SnowballEffect;
+import net.witixin.snowballeffect.block.MagicTorchBlock;
+import net.witixin.snowballeffect.block.MagicWallTorchBlock;
 
-import static net.witixin.snowballeffect.Reference.MODID;
+import static net.witixin.snowballeffect.SnowballEffect.MODID;
 
 public class BlockRegistry {
 
 
     public static final DeferredRegister<Block> BLOCK_REG = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final RegistryObject<Block> MAGIC_TORCH = BLOCK_REG.register("magic_torch_floor", () ->
-            new TorchBlock(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel((lightLevel) -> {return 15;}).sound(SoundType.WOOD), Reference.MAGIC_TORCH_PARTICLE.orElseGet(() -> ParticleTypes.FLAME)));
+            new MagicTorchBlock(BlockBehaviour.Properties.of().noCollission().instabreak().lightLevel((lightLevel) -> 15)
+                    .sound(SoundType.WOOD), SnowballEffect.MAGIC_TORCH_PARTICLE));
     public static final RegistryObject<Block> WALL_MAGIC_TORCH = BLOCK_REG.register("magic_torch_standing", () ->
-            new WallTorchBlock(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel((lightLevel) -> {return 15;}).sound(SoundType.WOOD).dropsLike(MAGIC_TORCH.get()), Reference.MAGIC_TORCH_PARTICLE.orElseGet(() -> ParticleTypes.FLAME)));
+            new MagicWallTorchBlock(BlockBehaviour.Properties.of().noCollission().instabreak().lightLevel((lightLevel) -> 15)
+                    .sound(SoundType.WOOD).lootFrom(MAGIC_TORCH), SnowballEffect.MAGIC_TORCH_PARTICLE));
 
     public static DeferredRegister<Block> get(){
         return BLOCK_REG;

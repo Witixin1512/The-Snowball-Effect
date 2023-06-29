@@ -16,19 +16,13 @@ out
 # gradle
 build
 .gradle
-gradle
 
 # other
 eclipse
 run
+runClient
 runServer
+runClientAlt
 
-ClientIgloofAccessoryPacket.java
-IAccessory.java
-#TODO turn into Armor or something
-EntitySantaHat.java
-santa_hat.animation.json
-santa_hat.geo.json
-santa_hat.png
 # Files from Forge MDK
 forge*changelog.txt

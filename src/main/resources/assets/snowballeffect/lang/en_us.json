@@ -1,5 +1,6 @@
 {
     "item.snowballeffect.magic_coal" : "Magic Coal",
+    "item.snowballeffect.magic_coal.tooltip": "Seems to react oddly around snowy blocks...",
     "entity.snowballeffect.igloof" : "Igloof",
     "block.snowballeffect.magic_torch_floor" : "Magic Torch",
     "itemGroup.snowballeffect.creativetab" : "Snowball Effect"
